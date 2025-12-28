@@ -18,7 +18,7 @@ private:
     Block* head;
     int nextId{};
     size_t totalsize{};
-    std::string allstrategy; 
+    std::string allocstrat; 
 
     void mergeFreeBlocks(Block* blk1, Block* blk2) 
     {
@@ -30,17 +30,19 @@ private:
 public:
 
     MemoryManager(size_t size, std::string strategy)
-        : totalsize(size), nextId(1), head (new Block(-1, size, static_cast<size_t>(0), true, nullptr)), allstrategy(strategy) {}
+        : totalsize(size), nextId(1), head (new Block(-1, size, static_cast<size_t>(0), true, nullptr)), allocstrat(strategy) {}
 
     void malloc(size_t reqsize) 
     {
-        if(allstrategy == "firstfit")
+        if(allocstrat == "firstfit")
         {
             Block* current = head;
+            bool done{false};
             while (current != nullptr)
             {
                 if(current->isFree && current->size >= reqsize)
                 {
+                    done = true;
                     Block* newblk{};
                     if(current->size != reqsize)
                     {
@@ -54,6 +56,90 @@ public:
                 }
                 current = current->next;
             }
+            if (!done)
+            {
+                //allocation failed
+            }
+        }
+
+        else if(allocstrat == "bestfit")
+        {
+            Block* bestblk{};
+            Block* current = head;
+
+            while (current != nullptr)
+            {
+                if(current->isFree && current->size >= reqsize)
+                {
+                    if(!bestblk)
+                    {
+                        bestblk = current;
+                    }
+                    else if(bestblk->size > current->size)
+                    {
+                        bestblk = current;
+                    }
+                }
+                current = current->next;
+            }
+
+            if(!bestblk)
+            {
+                //allocation failed
+            }
+            else if(bestblk->size == reqsize)
+            {
+                bestblk->isFree = false;
+                bestblk->id = nextId++;
+            }
+            else if(bestblk->size > reqsize)
+            {
+                Block* newblk = new Block(-1, bestblk->size - reqsize, bestblk->startAddress + reqsize, true, bestblk->next);
+                bestblk->next = newblk;
+                bestblk->size = reqsize;
+                bestblk->isFree = false;
+                bestblk->id = nextId++;
+            }
+        }
+        else if(allocstrat == "worstfit")
+        {
+            Block* worstblk{};
+            Block* current = head;
+
+            while (current != nullptr)
+            {
+                if(current->isFree && current->size >= reqsize)
+                {
+                    if(!worstblk)
+                    {
+                        worstblk = current;
+                    }
+                    else if(worstblk->size < current->size)
+                    {
+                        worstblk = current;
+                    }
+                }
+                current = current->next;
+            }
+
+            if(!worstblk)
+            {
+                //allocation failed
+            }
+            else if(worstblk->size == reqsize)
+            {
+                worstblk->isFree = false;
+                worstblk->id = nextId++;
+            }
+            else if(worstblk->size > reqsize)
+            {
+                Block* newblk = new Block(-1, worstblk->size - reqsize, worstblk->startAddress + reqsize, true, worstblk->next);
+                worstblk->next = newblk;
+                worstblk->size = reqsize;
+                worstblk->isFree = false;
+                worstblk->id = nextId++;
+            }
+
         }
     }
 
@@ -116,18 +202,25 @@ public:
 
 int main()
 {
-    MemoryManager mem(1024, "firstfit");    
+    MemoryManager mem(1024, "worstfit");    
     mem.dump();
     std::cout << "///" << std::endl;
 
     mem.malloc(100);
     mem.malloc(200);
+    mem.malloc(300);
     
     mem.dump();
     std::cout << "///" << std::endl;
 
-    mem.free(1);
+    mem.free(2);
 
     mem.dump();
+    std::cout << "///" << std::endl;
+    
+    mem.malloc(50);
+
+    mem.dump();
+
     std::cout << "///" << std::endl;
 }        
