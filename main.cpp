@@ -1,5 +1,6 @@
 #include <iostream>
-#include <bits/stdc++.h>
+#include <stdio.h>
+#include <string.h>
 
 struct Block {
     int id;
@@ -23,6 +24,7 @@ private:
     {
         blk1->next = blk2->next;
         blk1->size = blk1->size + blk2->size;
+        delete blk2;
     }
 
 public:
@@ -43,9 +45,9 @@ public:
                     if(current->size != reqsize)
                     {
                         newblk = new Block(-1, (current->size - reqsize), current->startAddress + reqsize, true, current->next);
+                        current->next = newblk;
+                        current->size = reqsize;
                     }
-                    current->next = newblk;
-                    current->size = reqsize;
                     current->isFree = false;
                     current->id = nextId++;
                     break;
@@ -58,6 +60,8 @@ public:
     void free(int blockId)
     {
         Block* current = head;   
+
+        //blockId should not be -1
         if(current->id == blockId)
         {
             current->isFree = true;
@@ -79,7 +83,7 @@ public:
                 {
                     current->isFree = true;
                     current->id = -1;
-                    if(current->next->isFree)
+                    if(current->next && current->next->isFree)
                     {
                         mergeFreeBlocks(current, current->next);
                     }
@@ -127,6 +131,3 @@ int main()
     mem.dump();
     std::cout << "///" << std::endl;
 }        
-    
-    
-    
