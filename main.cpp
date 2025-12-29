@@ -1,6 +1,8 @@
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
+#include <vector>
+#include <deque>
 
 struct Block {
     int id;
@@ -11,6 +13,56 @@ struct Block {
 
     Block(int _id, size_t _sz, size_t _addr, bool _free, Block* _next = nullptr)
         : id(_id), size(_sz), startAddress(_addr), isFree(_free), next(_next) {}
+};
+
+struct cacheline
+{
+    size_t tag;
+    bool valid;
+
+    cacheline()
+        :valid(false), tag(0){}
+
+    cacheline(size_t _tag, bool _valid = false)
+        :valid(_valid), tag(_tag){}
+};
+
+class cachelevel
+{
+private: 
+    size_t lvl;
+    size_t size;
+    size_t blksize;
+    std::vector <cacheline> lines;
+    std::deque <int> fifoqueue{};
+
+
+public:
+
+//blksize fixed at 10, numlines = size/blksize
+    cachelevel(size_t _lvl, size_t _size)
+        :lvl(_lvl), size(_size), blksize(10), lines(std::vector<cacheline>(_size/10)) {}
+
+    bool access(size_t addr)
+    {
+        size_t address = (addr/blksize)*blksize;
+        if(lines[address % lines.size()].tag == address && lines[address % lines.size()].valid)
+        {
+            fifoqueue.push_back(address % lines.size());
+            return true;
+        }
+        else
+            return false;
+    }
+
+    void load(size_t addr)
+    {
+        size_t address = (addr/blksize)*blksize;
+
+        lines[address % lines.size()].tag = address;
+        lines[address % lines.size()].valid = true;
+
+    }
 };
 
 class MemoryManager {
@@ -197,30 +249,81 @@ public:
     }
 
 
-    // bool isValidAddress(size_t addr); 
+    bool isValidAddress(size_t addr)
+    {
+        //add functionality to check if memory is free
+        if (addr < totalsize)
+            return true;
+        else
+            return false;
+    }
+};
+
+class SystemSimulator
+{
+private:
+    cachelevel l1;
+    cachelevel l2;
+
+public:
+    MemoryManager mem;
+    SystemSimulator(size_t memsize, std::string allocstrat, size_t cachesizel1, size_t cachesizel2) 
+        : mem(MemoryManager(memsize, allocstrat)), l1(cachelevel(1, cachesizel1)), l2(cachelevel(1, cachesizel2)) {}
+
+    void read(size_t address)
+    {
+        if(!mem.isValidAddress(address))
+        {
+            std::cout << "address is not valid" << std::endl;
+            return; 
+        }
+
+        if(l1.access(address))
+        {
+            std::cout << "l1 cache hit" << std::endl;
+        }
+        else if (l2.access(address))
+        {
+            std::cout << "l2 cache hit" << std::endl;
+            l1.load(address);
+        }
+        else
+        {
+            std::cout << "l1 and l2 miss" << std::endl;
+            l1.load(address);
+            l2.load(address);
+        }
+
+    }
 };
 
 int main()
 {
-    MemoryManager mem(1024, "worstfit");    
-    mem.dump();
+    SystemSimulator proc(1024, "worstfit", 100, 200);
+    proc.read(500);
+    proc.read(1030);
+    proc.read(500);
+
+
+
+    proc.mem.dump();
     std::cout << "///" << std::endl;
 
-    mem.malloc(100);
-    mem.malloc(200);
-    mem.malloc(300);
+    proc.mem.malloc(100);
+    proc.mem.malloc(200);
+    proc.mem.malloc(300);
     
-    mem.dump();
+    proc.mem.dump();
     std::cout << "///" << std::endl;
 
-    mem.free(2);
+    proc.mem.free(2);
 
-    mem.dump();
+    proc.mem.dump();
     std::cout << "///" << std::endl;
     
-    mem.malloc(50);
+    proc.mem.malloc(50);
 
-    mem.dump();
+    proc.mem.dump();
 
     std::cout << "///" << std::endl;
 }        
