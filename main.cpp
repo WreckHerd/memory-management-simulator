@@ -1,5 +1,4 @@
 #include <iostream>
-#include <stdio.h>
 #include <string.h>
 #include <vector>
 #include <deque>
@@ -13,6 +12,284 @@ struct Block {
 
     Block(int _id, size_t _sz, size_t _addr, bool _free, Block* _next = nullptr)
         : id(_id), size(_sz), startAddress(_addr), isFree(_free), next(_next) {}
+};
+
+class MemoryManager {
+private:
+    Block* head;
+    int nextId{};
+    size_t totalsize{};
+    std::string allocstrat; 
+    int reads{};
+    int unsucreads{};
+
+    void mergeFreeBlocks(Block* blk1, Block* blk2) 
+    {
+        blk1->next = blk2->next;
+        blk1->size = blk1->size + blk2->size;
+        delete blk2;
+    }
+
+public:
+
+    MemoryManager(size_t size, std::string strategy)
+        : totalsize(size), nextId(1), head (new Block(-1, size, static_cast<size_t>(0), true, nullptr)), allocstrat(strategy) {}
+
+    void malloc(size_t reqsize) 
+    {
+        if(allocstrat == "firstfit")
+        {
+            Block* current = head;
+            bool done{false};
+            while (current != nullptr)
+            {
+                if(current->isFree && current->size >= reqsize)
+                {
+                    done = true;
+                    Block* newblk{};
+                    if(current->size != reqsize)
+                    {
+                        newblk = new Block(-1, (current->size - reqsize), current->startAddress + reqsize, true, current->next);
+                        current->next = newblk;
+                        current->size = reqsize;
+                    }
+                    current->isFree = false;
+                    current->id = nextId;
+                    break;
+                }
+                current = current->next;
+            }
+            if (!done)
+            {
+                //allocation failed
+                std::cout << "allocation failed" << std::endl;
+                unsucreads++;
+            }
+
+            std::cout << "Allocated block id = " << nextId++ << "at address = " << current->startAddress << std::endl;
+            reads++;
+
+        }
+
+        else if(allocstrat == "bestfit")
+        {
+            Block* bestblk{};
+            Block* current = head;
+
+            while (current != nullptr)
+            {
+                if(current->isFree && current->size >= reqsize)
+                {
+                    if(!bestblk)
+                    {
+                        bestblk = current;
+                    }
+                    else if(bestblk->size > current->size)
+                    {
+                        bestblk = current;
+                    }
+                }
+                current = current->next;
+            }
+
+            if(!bestblk)
+            {
+                //allocation failed
+                std::cout << "allocation failed" << std::endl;
+                unsucreads++;
+            }
+            else if(bestblk->size == reqsize)
+            {
+                bestblk->isFree = false;
+                bestblk->id = nextId++;
+            }
+            else if(bestblk->size > reqsize)
+            {
+                Block* newblk = new Block(-1, bestblk->size - reqsize, bestblk->startAddress + reqsize, true, bestblk->next);
+                bestblk->next = newblk;
+                bestblk->size = reqsize;
+                bestblk->isFree = false;
+                bestblk->id = nextId;
+            }
+
+            std::cout << "Allocated block id = " << nextId++ << "at address = " << bestblk->startAddress << std::endl;
+            reads++;
+        }
+
+        else if(allocstrat == "worstfit")
+        {
+            Block* worstblk{};
+            Block* current = head;
+
+            while (current != nullptr)
+            {
+                if(current->isFree && current->size >= reqsize)
+                {
+                    if(!worstblk)
+                    {
+                        worstblk = current;
+                    }
+                    else if(worstblk->size < current->size)
+                    {
+                        worstblk = current;
+                    }
+                }
+                current = current->next;
+            }
+
+            if(!worstblk)
+            {
+                //allocation failed
+                std::cout << "allocation failed" << std::endl;
+                unsucreads++;
+            }
+            else if(worstblk->size == reqsize)
+            {
+                worstblk->isFree = false;
+                worstblk->id = nextId++;
+            }
+            else if(worstblk->size > reqsize)
+            {
+                Block* newblk = new Block(-1, worstblk->size - reqsize, worstblk->startAddress + reqsize, true, worstblk->next);
+                worstblk->next = newblk;
+                worstblk->size = reqsize;
+                worstblk->isFree = false;
+                worstblk->id = nextId;
+            }
+            std::cout << "Allocated block id = " << nextId++ << " at address = " << worstblk->startAddress << std::endl;
+            reads++;
+
+        }
+
+    }
+
+    void free(int blockId)
+    {
+        Block* current = head;   
+        bool done {false};
+        bool merged {false};
+
+        //blockId should not be -1
+        if(current->id == blockId)
+        {
+            done = true;
+            current->isFree = true;
+            current->id = -1;
+            std::cout << "Block with id " << blockId << " freed" << std::endl;
+
+            if(current->next->isFree)
+            {
+                mergeFreeBlocks(current, current->next);
+                std::cout << "free blocks merged" << std::endl;
+            }
+
+        }
+
+        else
+        {
+            Block* prev = current;
+            current = current->next;
+
+            while(current != nullptr)
+            {
+                if(current->id == blockId)
+                {
+                    done = true;
+                    current->isFree = true;
+                    current->id = -1;
+                    std::cout << "Block with id " << blockId << " freed" << std::endl;
+
+                    if(current->next && current->next->isFree)
+                    {
+                        merged = true;
+                        mergeFreeBlocks(current, current->next);
+                    }
+                    if(prev->isFree)
+                    {
+                        merged = true;
+                        mergeFreeBlocks(prev, current);
+                    }
+                    if (merged)
+                    {
+                        std::cout << "free blocks merged" << std::endl;
+                    }
+                    break;
+                }
+                current = current->next;
+                prev = prev->next;
+            }
+        }
+
+        if(!done)
+        {
+            //free failed
+            std::cout << "No allocated block with the given id exists";
+        }
+    }
+
+    void dump()
+    {
+        Block* current = head;
+        while (current != nullptr)
+        {
+            std::cout << "start addr: " << current->startAddress <<  ", size: " << current->size << ", isFree: " << current->isFree;
+            if(!current->isFree)
+                std::cout << ", block id: " << current->id << std::endl;
+            else
+                std::cout << std::endl;
+            
+            current = current->next;
+        }
+    }
+
+    void stats()
+    {
+        Block* current = head;
+        int usedmem{};
+        Block* largestfreeblk{};
+
+        std::cout << "Total memory: " << totalsize << std::endl;
+
+        while(current != nullptr)
+        {
+            if(current->isFree)
+            {
+                if(!largestfreeblk)
+                {
+                    largestfreeblk = current;
+                }
+                else
+                {
+                    if(current->size > largestfreeblk->size)
+                    {
+                        largestfreeblk = current;
+                    }
+                }
+            }
+            else
+                usedmem += current->size;
+
+            current = current->next;
+        }
+       
+        std::cout << "Used memory: " << usedmem << std::endl;
+        std::cout << "Memory Utilization: " << (static_cast<double>(usedmem)/static_cast<double>(totalsize))*100.0 << "%" << std::endl;
+
+        std::cout << "External Fregmentation: " << (1 - (static_cast<double>(largestfreeblk->size)/static_cast<double>(totalsize-usedmem)))*100.0 << "%" << std::endl;
+
+        std::cout << "Allocation faliure rate: " << (static_cast<double>(unsucreads)/static_cast<double>(reads))*100.0 << "%" << std::endl;
+
+    }
+
+
+    bool isValidAddress(size_t addr)
+    {
+        //add functionality to check if memory is free
+        if (addr < totalsize)
+            return true;
+        else
+            return false;
+    }
 };
 
 struct cacheline
@@ -65,199 +342,6 @@ public:
     }
 };
 
-class MemoryManager {
-private:
-    Block* head;
-    int nextId{};
-    size_t totalsize{};
-    std::string allocstrat; 
-
-    void mergeFreeBlocks(Block* blk1, Block* blk2) 
-    {
-        blk1->next = blk2->next;
-        blk1->size = blk1->size + blk2->size;
-        delete blk2;
-    }
-
-public:
-
-    MemoryManager(size_t size, std::string strategy)
-        : totalsize(size), nextId(1), head (new Block(-1, size, static_cast<size_t>(0), true, nullptr)), allocstrat(strategy) {}
-
-    void malloc(size_t reqsize) 
-    {
-        if(allocstrat == "firstfit")
-        {
-            Block* current = head;
-            bool done{false};
-            while (current != nullptr)
-            {
-                if(current->isFree && current->size >= reqsize)
-                {
-                    done = true;
-                    Block* newblk{};
-                    if(current->size != reqsize)
-                    {
-                        newblk = new Block(-1, (current->size - reqsize), current->startAddress + reqsize, true, current->next);
-                        current->next = newblk;
-                        current->size = reqsize;
-                    }
-                    current->isFree = false;
-                    current->id = nextId++;
-                    break;
-                }
-                current = current->next;
-            }
-            if (!done)
-            {
-                //allocation failed
-            }
-        }
-
-        else if(allocstrat == "bestfit")
-        {
-            Block* bestblk{};
-            Block* current = head;
-
-            while (current != nullptr)
-            {
-                if(current->isFree && current->size >= reqsize)
-                {
-                    if(!bestblk)
-                    {
-                        bestblk = current;
-                    }
-                    else if(bestblk->size > current->size)
-                    {
-                        bestblk = current;
-                    }
-                }
-                current = current->next;
-            }
-
-            if(!bestblk)
-            {
-                //allocation failed
-            }
-            else if(bestblk->size == reqsize)
-            {
-                bestblk->isFree = false;
-                bestblk->id = nextId++;
-            }
-            else if(bestblk->size > reqsize)
-            {
-                Block* newblk = new Block(-1, bestblk->size - reqsize, bestblk->startAddress + reqsize, true, bestblk->next);
-                bestblk->next = newblk;
-                bestblk->size = reqsize;
-                bestblk->isFree = false;
-                bestblk->id = nextId++;
-            }
-        }
-        else if(allocstrat == "worstfit")
-        {
-            Block* worstblk{};
-            Block* current = head;
-
-            while (current != nullptr)
-            {
-                if(current->isFree && current->size >= reqsize)
-                {
-                    if(!worstblk)
-                    {
-                        worstblk = current;
-                    }
-                    else if(worstblk->size < current->size)
-                    {
-                        worstblk = current;
-                    }
-                }
-                current = current->next;
-            }
-
-            if(!worstblk)
-            {
-                //allocation failed
-            }
-            else if(worstblk->size == reqsize)
-            {
-                worstblk->isFree = false;
-                worstblk->id = nextId++;
-            }
-            else if(worstblk->size > reqsize)
-            {
-                Block* newblk = new Block(-1, worstblk->size - reqsize, worstblk->startAddress + reqsize, true, worstblk->next);
-                worstblk->next = newblk;
-                worstblk->size = reqsize;
-                worstblk->isFree = false;
-                worstblk->id = nextId++;
-            }
-
-        }
-    }
-
-    void free(int blockId)
-    {
-        Block* current = head;   
-
-        //blockId should not be -1
-        if(current->id == blockId)
-        {
-            current->isFree = true;
-            current->id = -1;
-            if(current->next->isFree)
-            {
-                mergeFreeBlocks(current, current->next);
-            }
-        }
-
-        else
-        {
-            Block* prev = current;
-            current = current->next;
-
-            while(current != nullptr)
-            {
-                if(current->id == blockId)
-                {
-                    current->isFree = true;
-                    current->id = -1;
-                    if(current->next && current->next->isFree)
-                    {
-                        mergeFreeBlocks(current, current->next);
-                    }
-                    if(prev->isFree)
-                    {
-                        mergeFreeBlocks(prev, current);
-                    }
-                    break;
-                }
-                current = current->next;
-                prev = prev->next;
-            }
-        }
-    }
-
-    void dump()
-    {
-        Block* current = head;
-        while (current != nullptr)
-        {
-            std::cout << "start addr: " << current->startAddress <<  ", size: " << current->size << ", isFree: " << current->isFree << std::endl;;
-            
-            current = current->next;
-        }
-    }
-
-
-    bool isValidAddress(size_t addr)
-    {
-        //add functionality to check if memory is free
-        if (addr < totalsize)
-            return true;
-        else
-            return false;
-    }
-};
 
 class SystemSimulator
 {
@@ -324,6 +408,10 @@ int main()
     proc.mem.malloc(50);
 
     proc.mem.dump();
+
+    std::cout << "///" << std::endl;
+
+    proc.mem.stats();
 
     std::cout << "///" << std::endl;
 }        
