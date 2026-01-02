@@ -39,15 +39,19 @@ void MemoryManager::malloc(size_t reqsize)
             }
             current = current->next;
         }
+
         if (!done)
         {
             //allocation failed
             std::cout << "allocation failed" << std::endl;
             unsucreads++;
+            reads++;
         }
-
-        std::cout << "Allocated block id = " << nextId++ << "at address = " << current->startAddress << std::endl;
-        reads++;
+        else
+        {
+            std::cout << "Allocated block id = " << nextId++ << "at address = " << current->startAddress << std::endl;
+            reads++;
+        }
 
     }
 
@@ -77,6 +81,8 @@ void MemoryManager::malloc(size_t reqsize)
             //allocation failed
             std::cout << "allocation failed" << std::endl;
             unsucreads++;
+            reads++;
+            return;
         }
         else if(bestblk->size == reqsize)
         {
@@ -91,9 +97,9 @@ void MemoryManager::malloc(size_t reqsize)
             bestblk->isFree = false;
             bestblk->id = nextId;
         }
-
         std::cout << "Allocated block id = " << nextId++ << "at address = " << bestblk->startAddress << std::endl;
         reads++;
+
     }
 
     else if(allocstrat == "worstfit")
@@ -122,6 +128,8 @@ void MemoryManager::malloc(size_t reqsize)
             //allocation failed
             std::cout << "allocation failed" << std::endl;
             unsucreads++;
+            reads++;
+            return;
         }
         else if(worstblk->size == reqsize)
         {
@@ -157,7 +165,7 @@ void MemoryManager::free(int blockId)
         current->id = -1;
         std::cout << "Block with id " << blockId << " freed" << std::endl;
 
-        if(current->next->isFree)
+        if(current->next &&current->next &&  current->next->isFree)
         {
             mergeFreeBlocks(current, current->next);
             std::cout << "free blocks merged" << std::endl;

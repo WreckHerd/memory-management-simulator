@@ -48,6 +48,16 @@ int main()
     proc.read(1030);
     proc.read(500);
 
+    std::cout << "///" << std::endl;
+
+    proc.read(16);
+    proc.read(0);
+    proc.read(32);
+
+    proc.read(0);
+    proc.read(16);
+
+
 
 
     proc.mem.dump();

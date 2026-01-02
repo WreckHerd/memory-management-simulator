@@ -5,7 +5,6 @@
 #include <string>
 #include <cstddef>
 
-// Structure definition
 struct Block {
     int id;
     size_t size;
