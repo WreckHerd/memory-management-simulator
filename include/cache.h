@@ -10,7 +10,8 @@
 struct cacheline {
     size_t tag;
     bool valid;
-    cacheline(size_t _tag = 0, bool _valid = false);
+    bool dirty;
+    cacheline(size_t _tag = 0, bool _valid = false, bool _dirty = false);
 };
 
 class cacheset {
@@ -26,17 +27,18 @@ private:
     size_t lvl;
     size_t size;
     size_t linesize;
-    //std::vector<cacheline> lines;
-    //std::string org;
     size_t assoc;
     std::vector<cacheset> sets;
     std::string repol;
-//   std::deque <int> fifoqueue;
+    //std::deque <int> fifoqueue;
+    //std::vector<cacheline> lines;
+    //std::string org;
 
 public:
     cachelevel(size_t _lvl, size_t _size, size_t assoc = 2, std::string repol = "lru");
     bool access(size_t addr);
     void load(size_t addr);
+    std::pair<bool, size_t> write(size_t addr);
 };
 
 #endif

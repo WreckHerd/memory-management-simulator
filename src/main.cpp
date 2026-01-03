@@ -37,6 +37,29 @@ public:
             l1.load(address);
             l2.load(address);
         }
+    }
+
+    void write(size_t address)
+    {
+        if(!mem.isValidAddress(address))
+        {
+            std::cout << "Address is not valid" << std::endl;
+            return;
+        }        
+
+        std::pair <bool, size_t> l1ret = l1.write(address);
+
+        if(l1ret.first)
+        {
+            std::pair <bool, size_t> l2ret = l2.write(address);
+            std::cout << "L1 Eviction: writing dirty block " << l1ret.second << " to l2" << std::endl;
+
+            if(l2ret.first)
+            {
+                //main memory write is instant in this sim.
+                std::cout << "L2 Eviction : writing dirty block " << l2ret.second << " to main memory" << std:: endl;
+            }
+        }
 
     }
 };
