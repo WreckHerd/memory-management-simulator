@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstddef>
 #include <string> 
+#include <iostream>
 //#include <deque>
 
 
@@ -22,6 +23,15 @@ public:
     cacheset(size_t capacity);
 };
 
+struct writeresult {
+    bool wasHit;
+    bool wasEvicted;
+    size_t address;
+
+    writeresult(bool _wasEvicted, size_t _addr, bool _wasHit)
+        :wasEvicted(_wasEvicted), address(_addr), wasHit(_wasHit) {}
+};
+
 class cachelevel {
 private:
     size_t lvl;
@@ -30,6 +40,8 @@ private:
     size_t assoc;
     std::vector<cacheset> sets;
     std::string repol;
+    size_t hits{};
+    size_t misses{};
     //std::deque <int> fifoqueue;
     //std::vector<cacheline> lines;
     //std::string org;
@@ -38,7 +50,8 @@ public:
     cachelevel(size_t _lvl, size_t _size, size_t assoc = 2, std::string repol = "lru");
     bool access(size_t addr);
     void load(size_t addr);
-    std::pair<bool, size_t> write(size_t addr);
+    writeresult write(size_t addr);
+    void stats();
 };
 
 #endif

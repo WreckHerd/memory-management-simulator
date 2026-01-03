@@ -6,61 +6,97 @@
 class SystemSimulator
 {
 private:
-    cachelevel l1;
-    cachelevel l2;
+    const int LatencyL1{1};
+    const int LatencyL2{10};
+    const int Latencymem{100};
 
 public:
+    cachelevel l1;
+    cachelevel l2;
+    double totalcycles{};
+    int reads{};
+    int writes{};
+
     MemoryManager mem;
     SystemSimulator(size_t memsize, std::string allocstrat, size_t cachesizel1, size_t cachesizel2) 
         : mem(MemoryManager(memsize, allocstrat)), l1(cachelevel(1, cachesizel1)), l2(cachelevel(1, cachesizel2)) {}
 
     void read(size_t address)
     {
+        reads++;
         if(!mem.isValidAddress(address))
         {
             std::cout << "address is not valid" << std::endl;
             return; 
         }
 
+        totalcycles += LatencyL1;
         if(l1.access(address))
         {
             std::cout << "l1 cache hit" << std::endl;
+            return;
         }
-        else if (l2.access(address))
+
+        totalcycles += LatencyL2;
+        if (l2.access(address))
         {
             std::cout << "l2 cache hit" << std::endl;
             l1.load(address);
+            return;
         }
-        else
-        {
-            std::cout << "l1 and l2 miss" << std::endl;
-            l1.load(address);
-            l2.load(address);
-        }
+
+        totalcycles += Latencymem;
+
+        std::cout << "l1 and l2 miss" << std::endl;
+        l1.load(address);
+        l2.load(address);
     }
 
     void write(size_t address)
     {
+        writes++;
+
         if(!mem.isValidAddress(address))
         {
             std::cout << "Address is not valid" << std::endl;
             return;
         }        
 
-        std::pair <bool, size_t> l1ret = l1.write(address);
+        totalcycles += LatencyL1;
+        writeresult l1ret = l1.write(address);
 
-        if(l1ret.first)
+        if(!l1ret.wasHit)
         {
-            std::pair <bool, size_t> l2ret = l2.write(address);
-            std::cout << "L1 Eviction: writing dirty block " << l1ret.second << " to l2" << std::endl;
+            totalcycles += LatencyL2;
+            if(l2.access(address))
+                totalcycles += Latencymem;
+        }
+        if(l1ret.wasEvicted)
+        {
+            totalcycles += LatencyL2;
+            writeresult l2ret = l2.write(address);
 
-            if(l2ret.first)
+            std::cout << "L1 Eviction: writing dirty block " << l1ret.address << " to l2" << std::endl;
+
+            if(l2ret.wasEvicted)
             {
-                //main memory write is instant in this sim.
-                std::cout << "L2 Eviction : writing dirty block " << l2ret.second << " to main memory" << std:: endl;
+                totalcycles += Latencymem;
+                std::cout << "L2 Eviction : writing dirty block " << l2ret.address << " to main memory" << std:: endl;
             }
         }
 
+    }
+
+    void stats()
+    {
+        long totaloperations = reads + writes;
+        if(totaloperations > 0)
+        {
+            double amat = totalcycles / totaloperations;
+            std::cout << "Average Memory access time: " << amat << "cycles"<< std::endl;
+        }
+        else
+            std::cout << "no reads or writes performed yet";
     }
 };
 
@@ -108,4 +144,11 @@ int main()
     proc.mem.stats();
 
     std::cout << "///" << std::endl;
+    proc.l1.stats();
+    proc.l2.stats();
+
+    std::cout << "///" << std::endl;
+
+    proc.stats();
+
 }        

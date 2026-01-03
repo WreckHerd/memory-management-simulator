@@ -38,10 +38,11 @@ bool cachelevel::access(size_t addr)
                 sets[index].set.erase(it);
                 sets[index].set.emplace_back(cacheline(tag, true));
             }
+            ++hits;
             return true;
         }
     }
-
+    ++misses;
     return false;
 }
 
@@ -66,7 +67,7 @@ void cachelevel::load(size_t addr)
     sets[index].set.emplace_back(cacheline(tag, true));
 }
 
-std::pair<bool, size_t> cachelevel::write(size_t addr)
+writeresult cachelevel::write(size_t addr)
 {
     size_t blkaddress = (addr/linesize);
     size_t numlines = size/linesize;
@@ -84,23 +85,42 @@ std::pair<bool, size_t> cachelevel::write(size_t addr)
                 sets[index].set.erase(cline); 
                 sets[index].set.emplace_back(cacheline(tag, true, true));
             }
-            return {false, 0};
+            ++hits;
+            return writeresult(false, 0, true);
         }
     }
 
-    if(sets[index].set.begin()->dirty)
+    if(sets[index].set.size() >= sets[index].capacity)
     {
-        size_t retaddr = sets[index].set.begin()->tag*numsets*linesize;
-        sets[index].set.erase(sets[index].set.begin());
-        sets[index].set.emplace_back(cacheline(tag, true, true));
-        return {true, retaddr};
+        if(sets[index].set.begin()->dirty)
+        {
+            size_t retaddr = sets[index].set.begin()->tag*numsets*linesize;
+            sets[index].set.erase(sets[index].set.begin());
+            sets[index].set.emplace_back(cacheline(tag, true, true));
+            ++misses;
+            return writeresult(true, retaddr, false);
+        }
+        else
+        {
+            sets[index].set.erase(sets[index].set.begin());
+            sets[index].set.emplace_back(cacheline(tag, true, true));
+            ++misses;
+            return writeresult(false, 0, false);
+        }
     }
     else
     {
-        sets[index].set.erase(sets[index].set.begin());
         sets[index].set.emplace_back(cacheline(tag, true, true));
-        return {false, 0};
+        ++misses;
+        return writeresult(false, 0, false);
     }
+}
+
+void cachelevel::stats()
+{
+    std::cout << "Cache level L" << lvl << " has " << misses << " misses and " << hits << " hits" << std::endl;
+    std::cout << "Cache hit ratio of level L" << lvl << " is: " << static_cast<double>(hits)/ (static_cast<double>(hits + misses)) << std::endl;
+
 }
 
 
