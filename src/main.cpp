@@ -43,19 +43,20 @@ public:
 
 int main()
 {
-    SystemSimulator proc(1024, "worstfit", 100, 200);
+    SystemSimulator proc(1024, "worstfit", 64, 512);
     proc.read(500);
     proc.read(1030);
     proc.read(500);
 
     std::cout << "///" << std::endl;
 
-    proc.read(16);
+    proc.read(64);
     proc.read(0);
+    proc.read(64);
     proc.read(32);
 
+    proc.read(64);
     proc.read(0);
-    proc.read(16);
 
 
 
