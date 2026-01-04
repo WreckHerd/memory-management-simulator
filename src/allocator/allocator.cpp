@@ -49,7 +49,7 @@ void MemoryManager::malloc(size_t reqsize)
         }
         else
         {
-            std::cout << "Allocated block id = " << nextId++ << "at address = " << current->startAddress << std::endl;
+            std::cout << "Allocated block id = " << nextId++ << " at address = " << current->startAddress << std::endl;
             reads++;
         }
 
@@ -97,7 +97,7 @@ void MemoryManager::malloc(size_t reqsize)
             bestblk->isFree = false;
             bestblk->id = nextId;
         }
-        std::cout << "Allocated block id = " << nextId++ << "at address = " << bestblk->startAddress << std::endl;
+        std::cout << "Allocated block id = " << nextId++ << " at address = " << bestblk->startAddress << std::endl;
         reads++;
 
     }

@@ -1,10 +1,10 @@
 #include <iostream>
+#include <sstream>
 #include "allocator.h"
 #include "cache.h"
 
 
-class SystemSimulator
-{
+class SystemSimulator {
 private:
     const int LatencyL1{1};
     const int LatencyL2{10};
@@ -18,8 +18,9 @@ public:
     int writes{};
 
     MemoryManager mem;
-    SystemSimulator(size_t memsize, std::string allocstrat, size_t cachesizel1, size_t cachesizel2) 
-        : mem(MemoryManager(memsize, allocstrat)), l1(cachelevel(1, cachesizel1)), l2(cachelevel(1, cachesizel2)) {}
+
+    SystemSimulator(size_t memsize, std::string allocstrat, size_t cachesizel1, size_t cachesizel2, size_t cacheassoc, std::string cacheReplacementPolicy) 
+        : mem(MemoryManager(memsize, allocstrat)), l1(cachelevel(1, cachesizel1, cacheassoc, cacheReplacementPolicy)), l2(cachelevel(2, cachesizel2, cacheassoc, cacheReplacementPolicy)) {}
 
     void read(size_t address)
     {
@@ -68,7 +69,7 @@ public:
         if(!l1ret.wasHit)
         {
             totalcycles += LatencyL2;
-            if(l2.access(address))
+            if(!l2.access(address))
                 totalcycles += Latencymem;
         }
         if(l1ret.wasEvicted)
@@ -93,62 +94,191 @@ public:
         if(totaloperations > 0)
         {
             double amat = totalcycles / totaloperations;
-            std::cout << "Average Memory access time: " << amat << "cycles"<< std::endl;
+            std::cout << "Average Memory access time: " << amat << " cycles"<< std::endl;
         }
         else
             std::cout << "no reads or writes performed yet";
     }
 };
 
+void printhelp()
+{
+    std::cout << "\n---List of commands---\n";
+    std::cout << "malloc <size>     : allaocate a block of <size> in memory\n";
+    std::cout << "free <blockId>    : free the block with id <blockId\n"; 
+    std::cout << "memdump           : print the current state of memeory\n";
+    std::cout << std::endl;
+    std::cout << "read <address>    : read data a <address> from cache or memory\n";
+    std::cout << "write <address>   : write into <address>\n";
+    std::cout << "stats             : print stats related to cache and memory\n";
+    std::cout << "quit / exit       : exit the simulator\n";
+    std::cout << "-------------------------\n";
+}
+
 int main()
 {
-    SystemSimulator proc(1024, "worstfit", 64, 512);
-    proc.read(500);
-    proc.read(1030);
-    proc.read(500);
+    size_t memsize;
+    std::string allocstrat;
+    size_t l1size;
+    size_t l2size;
+    size_t cacheassoc;
+    std::string cacheRePol;
 
-    std::cout << "///" << std::endl;
+    std::cout << "Initialize MemoryAllocator and Cache\n";
 
-    proc.read(64);
-    proc.read(0);
-    proc.read(64);
-    proc.read(32);
+    std::cout << "Enter MainMemory size (bytes): ";
+    std::cin >> memsize;
 
-    proc.read(64);
-    proc.read(0);
+    std::cout << "Enter Allocation Strategy (firstfit / bestfit / worstfit): ";
+    std::cin >> allocstrat;
 
+    std::cout << "Enter L1 Cache Size (bytes): ";
+    std::cin >> l1size;
 
+    std::cout << "Enter L2 Cache Size (bytes): ";
+    std::cin >> l2size;
 
+    std::cout << "Enter Cache associativity ((1)direct associative / (2)-way associative / (4)-way associative / (8)-way associative): ";
+    std::cin >> cacheassoc;
 
-    proc.mem.dump();
-    std::cout << "///" << std::endl;
-
-    proc.mem.malloc(100);
-    proc.mem.malloc(200);
-    proc.mem.malloc(300);
+    std::cout << "Enter Cache Replacement Policy (fifo / lru): ";
+    std::cin >> cacheRePol; 
     
-    proc.mem.dump();
-    std::cout << "///" << std::endl;
+    SystemSimulator proc(memsize, allocstrat, l1size, l2size, cacheassoc, cacheRePol);
+    std::cout << "\n--simulator initialized successfully--\n";
+    printhelp();
 
-    proc.mem.free(2);
+    std::string dummy;
+    getline(std::cin, dummy);
 
-    proc.mem.dump();
-    std::cout << "///" << std::endl;
+    std::string line;
+    while(true)
+    {
+        std::cout << "\n MEMSIM> ";
+        std::getline(std::cin, line);
+        std::stringstream ss(line);
+
+        std::string command;
+
+        ss >> command;
+
+        if(command == "exit" || command == "quit")
+            break;
+
+        else if (command == "stats")
+        {
+            proc.mem.stats();
+            proc.l1.stats();
+            proc.l2.stats();
+            proc.stats();
+        }
+
+        else if(command == "memdump")
+        {
+            proc.mem.dump();
+        }
+
+        else if(command == "help")
+        {
+            printhelp();
+        }
+
+        else if (command == "malloc")
+        {
+            size_t size;
+
+            if(ss >> size)
+                proc.mem.malloc(size);
+            else
+                std::cout << "Error - Usage: malloc <size> - eg. malloc 1024\n";
+        }
+
+        else if (command == "free")
+        {
+            size_t id;
+
+            if(ss >> id)
+                proc.mem.free(id);
+            else    
+                std::cout << "Error - Usage: free <id>\n";
+        }
+
+        else if (command == "read") 
+        {
+            size_t addr;
+
+            if (ss >> addr) 
+                proc.read(addr);
+            else
+                std::cout << "Error: Usage: read <address>\n";
+        }
+
+        else if (command == "write") 
+        {
+            size_t addr;
+
+            if (ss >> addr)
+                proc.write(addr);
+            else
+                std::cout << "Error: Usage: write <address>\n";
+        }
+
+        else
+        {
+            std::cout << "Unknown command " << command << ". Type 'help' for command list\n";
+        }
+    }
+
+    std::cout << "Simulation Terminated\n";
+    return 0;
+
+
+    // SystemSimulator proc(1024, "worstfit", 64, 512);
+    // proc.read(500);
+    // proc.read(1030);
+    // proc.read(500);
+
+    // std::cout << "///" << std::endl;
+
+    // proc.read(64);
+    // proc.read(0);
+    // proc.read(64);
+    // proc.read(32);
+
+    // proc.read(64);
+    // proc.read(0);
+
+
+
+
+    // proc.mem.dump();
+    // std::cout << "///" << std::endl;
+
+    // proc.mem.malloc(100);
+    // proc.mem.malloc(200);
+    // proc.mem.malloc(300);
     
-    proc.mem.malloc(50);
+    // proc.mem.dump();
+    // std::cout << "///" << std::endl;
 
-    proc.mem.dump();
+    // proc.mem.free(2);
 
-    std::cout << "///" << std::endl;
+    // proc.mem.dump();
+    // std::cout << "///" << std::endl;
+    
+    // proc.mem.malloc(50);
 
-    proc.mem.stats();
+    // proc.mem.dump();
 
-    std::cout << "///" << std::endl;
-    proc.l1.stats();
-    proc.l2.stats();
+    // std::cout << "///" << std::endl;
 
-    std::cout << "///" << std::endl;
+    // proc.mem.stats();
 
-    proc.stats();
+    // std::cout << "///" << std::endl;
+    // proc.l1.stats();
+    // proc.l2.stats();
 
+    // std::cout << "///" << std::endl;
+
+    // proc.stats();
 }        

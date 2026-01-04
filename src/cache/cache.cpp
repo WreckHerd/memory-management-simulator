@@ -57,7 +57,7 @@ void cachelevel::load(size_t addr)
 
     for (auto it = sets[index].set.begin(); it != sets[index].set.end();++it)
     {
-        if(it->valid; it->tag == tag)
+        if(it->valid && it->tag == tag)
             return;
     }
 
