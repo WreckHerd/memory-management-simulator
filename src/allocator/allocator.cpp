@@ -1,13 +1,13 @@
 #include "allocator.h"
 
-Block::Block(int _id, size_t _sz, size_t _addr, bool _free, Block* _next)
+memNode::memNode(int _id, size_t _sz, size_t _addr, bool _free, memNode* _next)
     : id(_id), size(_sz), startAddress(_addr), isFree(_free), next(_next) {}
 
 
 MemoryManager::MemoryManager(size_t size, std::string strategy)
-    : totalsize(size), nextId(1), head (new Block(-1, size, static_cast<size_t>(0), true, nullptr)), allocstrat(strategy) {}
+    : totalsize(size), nextId(1), head (new memNode(-1, size, static_cast<size_t>(0), true, nullptr)), allocstrat(strategy) {}
 
-void MemoryManager::mergeFreeBlocks(Block* blk1, Block* blk2) 
+void MemoryManager::mergeFreememNodes(memNode* blk1, memNode* blk2) 
 {
     blk1->next = blk2->next;
     blk1->size = blk1->size + blk2->size;
@@ -19,17 +19,17 @@ void MemoryManager::malloc(size_t reqsize)
 {
     if(allocstrat == "firstfit")
     {
-        Block* current = head;
+        memNode* current = head;
         bool done{false};
         while (current != nullptr)
         {
             if(current->isFree && current->size >= reqsize)
             {
                 done = true;
-                Block* newblk{};
+                memNode* newblk{};
                 if(current->size != reqsize)
                 {
-                    newblk = new Block(-1, (current->size - reqsize), current->startAddress + reqsize, true, current->next);
+                    newblk = new memNode(-1, (current->size - reqsize), current->startAddress + reqsize, true, current->next);
                     current->next = newblk;
                     current->size = reqsize;
                 }
@@ -44,21 +44,21 @@ void MemoryManager::malloc(size_t reqsize)
         {
             //allocation failed
             std::cout << "allocation failed" << std::endl;
-            unsucreads++;
-            reads++;
+            unsucallocs++;
+            allocs++;
         }
         else
         {
             std::cout << "Allocated block id = " << nextId++ << " at address = " << current->startAddress << std::endl;
-            reads++;
+            allocs++;
         }
 
     }
 
     else if(allocstrat == "bestfit")
     {
-        Block* bestblk{};
-        Block* current = head;
+        memNode* bestblk{};
+        memNode* current = head;
 
         while (current != nullptr)
         {
@@ -80,8 +80,8 @@ void MemoryManager::malloc(size_t reqsize)
         {
             //allocation failed
             std::cout << "allocation failed" << std::endl;
-            unsucreads++;
-            reads++;
+            unsucallocs++;
+            allocs++;
             return;
         }
         else if(bestblk->size == reqsize)
@@ -91,21 +91,21 @@ void MemoryManager::malloc(size_t reqsize)
         }
         else if(bestblk->size > reqsize)
         {
-            Block* newblk = new Block(-1, bestblk->size - reqsize, bestblk->startAddress + reqsize, true, bestblk->next);
+            memNode* newblk = new memNode(-1, bestblk->size - reqsize, bestblk->startAddress + reqsize, true, bestblk->next);
             bestblk->next = newblk;
             bestblk->size = reqsize;
             bestblk->isFree = false;
             bestblk->id = nextId;
         }
         std::cout << "Allocated block id = " << nextId++ << " at address = " << bestblk->startAddress << std::endl;
-        reads++;
+        allocs++;
 
     }
 
     else if(allocstrat == "worstfit")
     {
-        Block* worstblk{};
-        Block* current = head;
+        memNode* worstblk{};
+        memNode* current = head;
 
         while (current != nullptr)
         {
@@ -127,8 +127,8 @@ void MemoryManager::malloc(size_t reqsize)
         {
             //allocation failed
             std::cout << "allocation failed" << std::endl;
-            unsucreads++;
-            reads++;
+            unsucallocs++;
+            allocs++;
             return;
         }
         else if(worstblk->size == reqsize)
@@ -138,14 +138,14 @@ void MemoryManager::malloc(size_t reqsize)
         }
         else if(worstblk->size > reqsize)
         {
-            Block* newblk = new Block(-1, worstblk->size - reqsize, worstblk->startAddress + reqsize, true, worstblk->next);
+            memNode* newblk = new memNode(-1, worstblk->size - reqsize, worstblk->startAddress + reqsize, true, worstblk->next);
             worstblk->next = newblk;
             worstblk->size = reqsize;
             worstblk->isFree = false;
             worstblk->id = nextId;
         }
         std::cout << "Allocated block id = " << nextId++ << " at address = " << worstblk->startAddress << std::endl;
-        reads++;
+        allocs++;
 
     }
 
@@ -153,7 +153,7 @@ void MemoryManager::malloc(size_t reqsize)
 
 void MemoryManager::free(int blockId)
 {
-    Block* current = head;   
+    memNode* current = head;   
     bool done {false};
     bool merged {false};
 
@@ -167,7 +167,7 @@ void MemoryManager::free(int blockId)
 
         if(current->next &&current->next &&  current->next->isFree)
         {
-            mergeFreeBlocks(current, current->next);
+            mergeFreememNodes(current, current->next);
             std::cout << "free blocks merged" << std::endl;
         }
 
@@ -175,7 +175,7 @@ void MemoryManager::free(int blockId)
 
     else
     {
-        Block* prev = current;
+        memNode* prev = current;
         current = current->next;
 
         while(current != nullptr)
@@ -190,12 +190,12 @@ void MemoryManager::free(int blockId)
                 if(current->next && current->next->isFree)
                 {
                     merged = true;
-                    mergeFreeBlocks(current, current->next);
+                    mergeFreememNodes(current, current->next);
                 }
                 if(prev->isFree)
                 {
                     merged = true;
-                    mergeFreeBlocks(prev, current);
+                    mergeFreememNodes(prev, current);
                 }
                 if (merged)
                 {
@@ -217,7 +217,7 @@ void MemoryManager::free(int blockId)
 
 void MemoryManager::dump()
 {
-    Block* current = head;
+    memNode* current = head;
     while (current != nullptr)
     {
         std::cout << "start addr: " << current->startAddress <<  ", size: " << current->size << ", isFree: " << current->isFree;
@@ -232,9 +232,9 @@ void MemoryManager::dump()
 
 void MemoryManager::stats()
 {
-    Block* current = head;
+    memNode* current = head;
     int usedmem{};
-    Block* largestfreeblk{};
+    memNode* largestfreeblk{};
 
     std::cout << "Total memory: " << totalsize << std::endl;
 
@@ -265,15 +265,21 @@ void MemoryManager::stats()
 
     std::cout << "External Fregmentation: " << (1 - (static_cast<double>(largestfreeblk->size)/static_cast<double>(totalsize-usedmem)))*100.0 << "%" << std::endl;
 
-    std::cout << "Allocation faliure rate: " << (static_cast<double>(unsucreads)/static_cast<double>(reads))*100.0 << "%" << std::endl;
+    std::cout << "Allocation faliure rate: " << (static_cast<double>(unsucallocs)/static_cast<double>(allocs))*100.0 << "%" << std::endl;
 
 }
 
 
 bool MemoryManager::isValidAddress(size_t addr)
 {
-    //add functionality to check if memory is free
-    if (addr < totalsize)
+    if(addr > totalsize)
+        return false;
+    memNode* current = head;
+    while(current && current->startAddress + current->size <= addr)
+    {
+        current = current->next;
+    }
+    if (current && !current->isFree)
         return true;
     else
         return false;

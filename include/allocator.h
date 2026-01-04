@@ -5,26 +5,26 @@
 #include <string>
 #include <cstddef>
 
-struct Block {
+struct memNode {
     int id;
     size_t size;
     size_t startAddress;
     bool isFree;
-    Block* next;
+    memNode* next;
 
-    Block(int _id, size_t _sz, size_t _addr, bool _free, Block* _next = nullptr);
+    memNode(int _id, size_t _sz, size_t _addr, bool _free, memNode* _next = nullptr);
 };
 
 class MemoryManager {
 private:
-    Block* head;
+    memNode* head;
     int nextId;
     size_t totalsize;
     std::string allocstrat;
-    int reads;
-    int unsucreads;
+    int allocs{};
+    int unsucallocs{};
 
-    void mergeFreeBlocks(Block* blk1, Block* blk2);
+    void mergeFreememNodes(memNode* blk1, memNode* blk2);
 
 public:
     MemoryManager(size_t size, std::string strategy);

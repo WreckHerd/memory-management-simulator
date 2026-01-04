@@ -16,6 +16,8 @@ public:
     double totalcycles{};
     int reads{};
     int writes{};
+    double hits{};
+    double misses{};
 
     MemoryManager mem;
 
@@ -27,7 +29,7 @@ public:
         reads++;
         if(!mem.isValidAddress(address))
         {
-            std::cout << "address is not valid" << std::endl;
+            std::cout << "segmentation fault" << std::endl;
             return; 
         }
 
@@ -35,6 +37,7 @@ public:
         if(l1.access(address))
         {
             std::cout << "l1 cache hit" << std::endl;
+            ++hits;
             return;
         }
 
@@ -42,12 +45,14 @@ public:
         if (l2.access(address))
         {
             std::cout << "l2 cache hit" << std::endl;
+            ++hits;
             l1.load(address);
             return;
         }
 
         totalcycles += Latencymem;
 
+        ++misses;
         std::cout << "l1 and l2 miss" << std::endl;
         l1.load(address);
         l2.load(address);
@@ -59,7 +64,7 @@ public:
 
         if(!mem.isValidAddress(address))
         {
-            std::cout << "Address is not valid" << std::endl;
+            std::cout << "segmentation fault" << std::endl;
             return;
         }        
 
@@ -68,10 +73,14 @@ public:
 
         if(!l1ret.wasHit)
         {
+            ++misses;
             totalcycles += LatencyL2;
             if(!l2.access(address))
                 totalcycles += Latencymem;
         }
+        else
+            ++misses;
+
         if(l1ret.wasEvicted)
         {
             totalcycles += LatencyL2;
@@ -90,6 +99,10 @@ public:
 
     void stats()
     {
+        double hitratio = hits/(hits+misses);
+
+        std::cout << "Hit ratio: " << hitratio << std::endl;
+
         long totaloperations = reads + writes;
         if(totaloperations > 0)
         {
@@ -98,6 +111,7 @@ public:
         }
         else
             std::cout << "no reads or writes performed yet";
+
     }
 };
 
@@ -155,7 +169,10 @@ int main()
     while(true)
     {
         std::cout << "\n MEMSIM> ";
-        std::getline(std::cin, line);
+        if(!std::getline(std::cin, line)) 
+            break;
+        if(line.empty())
+            continue;
         std::stringstream ss(line);
 
         std::string command;
@@ -167,7 +184,12 @@ int main()
 
         else if (command == "stats")
         {
+            std::cout << "---Allocator stats---\n";
             proc.mem.stats();
+            std::cout << std::endl;
+        
+
+            std::cout << "---Cache stats---\n";
             proc.l1.stats();
             proc.l2.stats();
             proc.stats();
@@ -232,53 +254,4 @@ int main()
     std::cout << "Simulation Terminated\n";
     return 0;
 
-
-    // SystemSimulator proc(1024, "worstfit", 64, 512);
-    // proc.read(500);
-    // proc.read(1030);
-    // proc.read(500);
-
-    // std::cout << "///" << std::endl;
-
-    // proc.read(64);
-    // proc.read(0);
-    // proc.read(64);
-    // proc.read(32);
-
-    // proc.read(64);
-    // proc.read(0);
-
-
-
-
-    // proc.mem.dump();
-    // std::cout << "///" << std::endl;
-
-    // proc.mem.malloc(100);
-    // proc.mem.malloc(200);
-    // proc.mem.malloc(300);
-    
-    // proc.mem.dump();
-    // std::cout << "///" << std::endl;
-
-    // proc.mem.free(2);
-
-    // proc.mem.dump();
-    // std::cout << "///" << std::endl;
-    
-    // proc.mem.malloc(50);
-
-    // proc.mem.dump();
-
-    // std::cout << "///" << std::endl;
-
-    // proc.mem.stats();
-
-    // std::cout << "///" << std::endl;
-    // proc.l1.stats();
-    // proc.l2.stats();
-
-    // std::cout << "///" << std::endl;
-
-    // proc.stats();
 }        

@@ -119,7 +119,7 @@ writeresult cachelevel::write(size_t addr)
 void cachelevel::stats()
 {
     std::cout << "Cache level L" << lvl << " has " << misses << " misses and " << hits << " hits" << std::endl;
-    std::cout << "Cache hit ratio of level L" << lvl << " is: " << static_cast<double>(hits)/ (static_cast<double>(hits + misses)) << std::endl;
+    //std::cout << "Cache hit ratio of level L" << lvl << " is: " << static_cast<double>(hits)/ (static_cast<double>(hits + misses)) << std::endl;
 
 }
 
