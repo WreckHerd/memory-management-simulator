@@ -21,8 +21,8 @@ public:
 
     MemoryManager mem;
 
-    SystemSimulator(size_t memsize, std::string allocstrat, size_t cachesizel1, size_t cachesizel2, size_t cacheassoc, std::string cacheReplacementPolicy) 
-        : mem(MemoryManager(memsize, allocstrat)), l1(cachelevel(1, cachesizel1, cacheassoc, cacheReplacementPolicy)), l2(cachelevel(2, cachesizel2, cacheassoc, cacheReplacementPolicy)) {}
+    SystemSimulator(size_t memsize, std::string allocstrat, size_t cachesizel1, size_t cachesizel2, size_t cacheassoc, std::string cacheReplacementPolicy, size_t linesize) 
+        : mem(MemoryManager(memsize, allocstrat)), l1(cachelevel(1, cachesizel1, cacheassoc, cacheReplacementPolicy, linesize)), l2(cachelevel(2, cachesizel2, cacheassoc, cacheReplacementPolicy, linesize)) {}
 
     void read(size_t address)
     {
@@ -128,6 +128,61 @@ void printhelp()
     std::cout << "quit / exit       : exit the simulator\n";
     std::cout << "-------------------------\n";
 }
+bool validateConfig(size_t memSize, size_t l1Size, size_t l2Size, size_t lineSize, size_t assoc) 
+{
+    if (memSize <= 0 || l1Size <= 0 || l2Size <= 0 || lineSize <= 0 || assoc <= 0) 
+    {
+        std::cout << "Error: All sizes and associativity must be positive non-zero integers.\n";
+        return false;
+    }
+
+    // Line Size Power of 2 Check
+    if ((lineSize & (lineSize - 1)) != 0) 
+    {
+        std::cout << "Error: Line Size must be a power of 2 (e.g., 8, 16, 32, 64).\n";
+        return false;
+    }
+
+    if (l1Size % lineSize != 0 || l2Size % lineSize != 0) 
+    {
+        std::cout << "Error: Cache sizes must be a multiple of the Line Size.\n";
+        return false;
+    }
+
+    size_t l1Lines = l1Size / lineSize;
+    size_t l2Lines = l2Size / lineSize;
+
+    if (l1Lines % assoc != 0) 
+    {
+        std::cout << "Error: L1 Configuration invalid. Total lines (" << l1Lines 
+                  << ") is not divisible by associativity (" << assoc << ").\n";
+        return false;
+    }
+    if (l2Lines % assoc != 0) 
+    {
+        std::cout << "Error: L2 Configuration invalid. Total lines (" << l2Lines 
+                  << ") is not divisible by associativity (" << assoc << ").\n";
+        return false;
+    }
+
+    if (l1Size >= l2Size) 
+    {
+        std::cout << "Error: L1 Cache must be smaller than L2 Cache.\n";
+        return false;
+    }
+    if (l2Size >= memSize) 
+    {
+        std::cout << "Error: L2 Cache must be smaller than Main Memory.\n";
+        return false;
+    }
+
+    if (memSize % lineSize != 0) 
+    {
+        std::cout << "Warning: Main Memory size is not a multiple of Line Size. The last partial block may be unusable.\n";
+    }
+
+    return true;
+}
 
 int main()
 {
@@ -137,28 +192,39 @@ int main()
     size_t l2size;
     size_t cacheassoc;
     std::string cacheRePol;
+    size_t linesize;
 
-    std::cout << "Initialize MemoryAllocator and Cache\n";
+    while(true)
+    {
+        std::cout << "Initialize MemoryAllocator and Cache\n";
 
-    std::cout << "Enter MainMemory size (bytes): ";
-    std::cin >> memsize;
+        std::cout << "Enter MainMemory size (bytes): ";
+        std::cin >> memsize;
 
-    std::cout << "Enter Allocation Strategy (firstfit / bestfit / worstfit): ";
-    std::cin >> allocstrat;
+        std::cout << "Enter Allocation Strategy (firstfit / bestfit / worstfit): ";
+        std::cin >> allocstrat;
 
-    std::cout << "Enter L1 Cache Size (bytes): ";
-    std::cin >> l1size;
+        std::cout << "Enter L1 Cache Size (bytes): ";
+        std::cin >> l1size;
 
-    std::cout << "Enter L2 Cache Size (bytes): ";
-    std::cin >> l2size;
+        std::cout << "Enter L2 Cache Size (bytes): ";
+        std::cin >> l2size;
 
-    std::cout << "Enter Cache associativity ((1)direct associative / (2)-way associative / (4)-way associative / (8)-way associative): ";
-    std::cin >> cacheassoc;
+        std::cout << "Enter linesize (bytes): ";
 
-    std::cout << "Enter Cache Replacement Policy (fifo / lru): ";
-    std::cin >> cacheRePol; 
+        std::cout << "Enter Cache associativity ((1)direct associative / (2)-way associative / (4)-way associative / (8)-way associative): ";
+        std::cin >> cacheassoc;
+
+        std::cout << "Enter Cache Replacement Policy (fifo / lru): ";
+        std::cin >> cacheRePol; 
+
+        if(validateConfig(memsize, l1size, l2size, linesize, cacheassoc))
+            break;
+        else    
+            std::cout << "Invalid configuration" << std::endl;
+    }
     
-    SystemSimulator proc(memsize, allocstrat, l1size, l2size, cacheassoc, cacheRePol);
+    SystemSimulator proc(memsize, allocstrat, l1size, l2size, cacheassoc, cacheRePol, linesize);
     std::cout << "\n--simulator initialized successfully--\n";
     printhelp();
 

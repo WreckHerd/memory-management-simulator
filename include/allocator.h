@@ -28,6 +28,7 @@ private:
 
 public:
     MemoryManager(size_t size, std::string strategy);
+    ~MemoryManager();
 
     void malloc(size_t reqsize);
     void free(int blockId);

@@ -47,7 +47,7 @@ private:
     //std::string org;
 
 public:
-    cachelevel(size_t _lvl, size_t _size, size_t assoc = 2, std::string repol = "lru");
+    cachelevel(size_t _lvl, size_t _size, size_t assoc = 2, std::string repol = "lru", size_t linesize = 8);
     bool access(size_t addr);
     void load(size_t addr);
     writeresult write(size_t addr);

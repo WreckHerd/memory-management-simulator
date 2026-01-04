@@ -7,6 +7,18 @@ memNode::memNode(int _id, size_t _sz, size_t _addr, bool _free, memNode* _next)
 MemoryManager::MemoryManager(size_t size, std::string strategy)
     : totalsize(size), nextId(1), head (new memNode(-1, size, static_cast<size_t>(0), true, nullptr)), allocstrat(strategy) {}
 
+MemoryManager::~MemoryManager()
+{
+    memNode* current = head;
+    while(current)
+    {
+        memNode* nextnode = current->next;
+        delete current;
+        current = nextnode;
+    }
+}
+
+
 void MemoryManager::mergeFreememNodes(memNode* blk1, memNode* blk2) 
 {
     blk1->next = blk2->next;
