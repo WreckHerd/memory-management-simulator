@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <string> 
 #include <iostream>
-//#include <deque>
 
 
 struct cacheline {
@@ -42,9 +41,6 @@ private:
     std::string repol;
     size_t hits{};
     size_t misses{};
-    //std::deque <int> fifoqueue;
-    //std::vector<cacheline> lines;
-    //std::string org;
 
 public:
     cachelevel(size_t _lvl, size_t _size, size_t assoc = 2, std::string repol = "lru", size_t linesize = 8);
