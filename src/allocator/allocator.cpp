@@ -273,11 +273,13 @@ void MemoryManager::stats()
     }
     
     std::cout << "Used memory: " << usedmem << std::endl;
-    std::cout << "Memory Utilization: " << (static_cast<double>(usedmem)/static_cast<double>(totalsize))*100.0 << "%" << std::endl;
+    if(totalsize != 0)
+        std::cout << "Memory Utilization: " << (static_cast<double>(usedmem)/static_cast<double>(totalsize))*100.0 << "%" << std::endl;
 
-    std::cout << "External Fregmentation: " << (1 - (static_cast<double>(largestfreeblk->size)/static_cast<double>(totalsize-usedmem)))*100.0 << "%" << std::endl;
-
-    std::cout << "Allocation faliure rate: " << (static_cast<double>(unsucallocs)/static_cast<double>(allocs))*100.0 << "%" << std::endl;
+    if(largestfreeblk && totalsize - usedmem  != 0)
+        std::cout << "External Fregmentation: " << (1 - (static_cast<double>(largestfreeblk->size)/static_cast<double>(totalsize-usedmem)))*100.0 << "%" << std::endl;
+    if(allocs != 0)
+        std::cout << "Allocation faliure rate: " << (static_cast<double>(unsucallocs)/static_cast<double>(allocs))*100.0 << "%" << std::endl;
 
 }
 
