@@ -79,7 +79,10 @@ public:
                 totalcycles += Latencymem;
         }
         else
-            ++misses;
+        {
+            std::cout << "l1 cache hit for write \n";
+            ++hits;
+        }
 
         if(l1ret.wasEvicted)
         {
@@ -211,6 +214,7 @@ int main()
         std::cin >> l2size;
 
         std::cout << "Enter linesize (bytes): ";
+        std::cin >> linesize;     
 
         std::cout << "Enter Cache associativity ((1)direct associative / (2)-way associative / (4)-way associative / (8)-way associative): ";
         std::cin >> cacheassoc;

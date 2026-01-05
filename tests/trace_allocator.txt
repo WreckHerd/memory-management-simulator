@@ -1,0 +1,17 @@
+1024
+worstfit
+64
+256
+16
+1
+lru
+malloc 100
+malloc 100
+malloc 100
+malloc 100
+free 2
+free 4
+malloc 50
+memdump
+stats
+exit
