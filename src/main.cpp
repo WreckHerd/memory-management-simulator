@@ -2,6 +2,7 @@
 #include <sstream>
 #include "allocator.h"
 #include "cache.h"
+#include "buddy.h"
 
 
 class SystemSimulator {
@@ -13,6 +14,7 @@ private:
 public:
     cachelevel l1;
     cachelevel l2;
+    bool isBuddy;
     double totalcycles{};
     int reads{};
     int writes{};
@@ -21,8 +23,10 @@ public:
 
     MemoryManager mem;
 
-    SystemSimulator(size_t memsize, std::string allocstrat, size_t cachesizel1, size_t cachesizel2, size_t cacheassoc, std::string cacheReplacementPolicy, size_t linesize) 
-        : mem(MemoryManager(memsize, allocstrat)), l1(cachelevel(1, cachesizel1, cacheassoc, cacheReplacementPolicy, linesize)), l2(cachelevel(2, cachesizel2, cacheassoc, cacheReplacementPolicy, linesize)) {}
+    BuddyManager buddymem;
+
+    SystemSimulator(size_t memsize, std::string allocstrat, size_t cachesizel1, size_t cachesizel2, size_t cacheassoc, std::string cacheReplacementPolicy, size_t linesize, bool _isBuddy = false ) 
+        : mem(MemoryManager(memsize, allocstrat)), l1(cachelevel(1, cachesizel1, cacheassoc, cacheReplacementPolicy, linesize)), l2(cachelevel(2, cachesizel2, cacheassoc, cacheReplacementPolicy, linesize)), buddymem(BuddyManager(memsize)) {}
 
     void read(size_t address)
     {
@@ -196,10 +200,14 @@ int main()
     size_t cacheassoc;
     std::string cacheRePol;
     size_t linesize;
+    char cbuddy;
 
     while(true)
     {
         std::cout << "Initialize MemoryAllocator and Cache\n";
+
+        std::cout << "Do you want buddy allocation (N/y): ";
+        std::cin >> cbuddy;
 
         std::cout << "Enter MainMemory size (bytes): ";
         std::cin >> memsize;
@@ -227,10 +235,16 @@ int main()
         else    
             std::cout << "Invalid configuration" << std::endl;
     }
+
     
     SystemSimulator proc(memsize, allocstrat, l1size, l2size, cacheassoc, cacheRePol, linesize);
     std::cout << "\n--simulator initialized successfully--\n";
     printhelp();
+
+    if(cbuddy == 'y')
+    {
+        proc.isBuddy = true;
+    }
 
     std::string dummy;
     getline(std::cin, dummy);
@@ -280,7 +294,15 @@ int main()
             size_t size;
 
             if(ss >> size)
-                proc.mem.malloc(size);
+            {
+
+                if(proc.isBuddy)
+                {
+                    proc.buddymem.malloc(size);
+                }
+                else
+                    proc.mem.malloc(size);
+            }
             else
                 std::cout << "Error - Usage: malloc <size> - eg. malloc 1024\n";
         }
@@ -290,7 +312,12 @@ int main()
             size_t id;
 
             if(ss >> id)
-                proc.mem.free(id);
+                if(proc.isBuddy)
+                {
+                    proc.buddymem.free(id);
+                }
+                else
+                    proc.mem.free(id);
             else    
                 std::cout << "Error - Usage: free <id>\n";
         }
