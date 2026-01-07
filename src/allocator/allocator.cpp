@@ -278,7 +278,6 @@ void MemoryManager::stats()
 
     if(largestfreeblk && totalsize - usedmem  != 0)
         std::cout << "External Fregmentation: " << (1 - (static_cast<double>(largestfreeblk->size)/static_cast<double>(totalsize-usedmem)))*100.0 << "%" << std::endl;
-        std:: cout << largestfreeblk->size << "  " << totalsize - usedmem << std::endl;
     if(allocs != 0)
         std::cout << "Allocation faliure rate: " << (static_cast<double>(unsucallocs)/static_cast<double>(allocs))*100.0 << "%" << std::endl;
 

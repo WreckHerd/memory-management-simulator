@@ -135,6 +135,21 @@ void printhelp()
     std::cout << "quit / exit       : exit the simulator\n";
     std::cout << "-------------------------\n";
 }
+
+void print_requirements()
+{
+    std::cout << std::endl;
+    std::cout << "___Configuration must follow the following requirements___\n";
+    std::cout << "- 0 < L1 size < L2 size < main memory size\n";
+    std::cout << "- Buddy allocation requires memory size to be a power of two\n";
+    std::cout << "- Line size must be a power of 2\n";
+    std::cout << "- Cache size and main memory size must be multiple of line size\n";
+    std::cout << "- Number of lines = L(1,2) size/linesize, must be divisible by associativity\n";
+    std::cout << "- Associativity > 0\n";
+    std::cout << "Note: if you want a quick run you can find test inputs in tests directory\n";
+    std::cout << std::endl;
+}
+
 bool validateConfig(size_t memSize, size_t l1Size, size_t l2Size, size_t lineSize, size_t assoc, char cbuddy) 
 {
     if (memSize <= 0 || l1Size <= 0 || l2Size <= 0 || lineSize <= 0 || assoc <= 0) 
@@ -213,6 +228,7 @@ int main()
 
     while(true)
     {
+        print_requirements();
         std::cout << "Initialize MemoryAllocator and Cache\n";
 
         std::cout << "Do you want buddy allocation (N/y): ";
