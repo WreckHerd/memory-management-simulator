@@ -8,7 +8,6 @@ cacheset::cacheset(size_t _cap)
     :capacity(_cap){}
 
 
-//linesize fixed at 8
 cachelevel::cachelevel(size_t _lvl, size_t _size, size_t _assoc, std::string _repol, size_t linesize)
     :lvl(_lvl), size(_size), linesize(linesize), assoc(_assoc), repol(_repol) 
     {   

@@ -28,6 +28,7 @@ private:
 
 public:
     BuddyManager(size_t memsize);
+    ~BuddyManager();
     void malloc(size_t address);
     void free(int Id);
     BNode* trickle(int index);

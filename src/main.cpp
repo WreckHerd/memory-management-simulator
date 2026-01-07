@@ -135,7 +135,7 @@ void printhelp()
     std::cout << "quit / exit       : exit the simulator\n";
     std::cout << "-------------------------\n";
 }
-bool validateConfig(size_t memSize, size_t l1Size, size_t l2Size, size_t lineSize, size_t assoc) 
+bool validateConfig(size_t memSize, size_t l1Size, size_t l2Size, size_t lineSize, size_t assoc, char cbuddy) 
 {
     if (memSize <= 0 || l1Size <= 0 || l2Size <= 0 || lineSize <= 0 || assoc <= 0) 
     {
@@ -143,7 +143,16 @@ bool validateConfig(size_t memSize, size_t l1Size, size_t l2Size, size_t lineSiz
         return false;
     }
 
-    // Line Size Power of 2 Check
+    // Power of 2 Check
+
+    if(cbuddy == 'y')
+    {
+        if((memSize & (memSize - 1)) != 0)
+        {
+            std::cout << "Error: memory size must be a power of 2 while using buddy allocator.\n";
+            return false;
+        }
+    }
     if ((lineSize & (lineSize - 1)) != 0) 
     {
         std::cout << "Error: Line Size must be a power of 2 (e.g., 8, 16, 32, 64).\n";
@@ -212,8 +221,11 @@ int main()
         std::cout << "Enter MainMemory size (bytes): ";
         std::cin >> memsize;
 
-        std::cout << "Enter Allocation Strategy (firstfit / bestfit / worstfit): ";
-        std::cin >> allocstrat;
+        if(cbuddy != 'y')
+        {
+            std::cout << "Enter Allocation Strategy (firstfit / bestfit / worstfit): ";
+            std::cin >> allocstrat;
+        }
 
         std::cout << "Enter L1 Cache Size (bytes): ";
         std::cin >> l1size;
@@ -230,7 +242,7 @@ int main()
         std::cout << "Enter Cache Replacement Policy (fifo / lru): ";
         std::cin >> cacheRePol; 
 
-        if(validateConfig(memsize, l1size, l2size, linesize, cacheassoc))
+        if(validateConfig(memsize, l1size, l2size, linesize, cacheassoc, cbuddy))
             break;
         else    
             std::cout << "Invalid configuration" << std::endl;
@@ -268,9 +280,12 @@ int main()
 
         else if (command == "stats")
         {
-            std::cout << "---Allocator stats---\n";
-            proc.mem.stats();
-            std::cout << std::endl;
+            if(!proc.isBuddy)
+            {
+                std::cout << "---Allocator stats---\n";
+                proc.mem.stats();
+                std::cout << std::endl;
+            }
         
 
             std::cout << "---Cache stats---\n";

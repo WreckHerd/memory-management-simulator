@@ -16,6 +16,30 @@ BuddyManager::BuddyManager(size_t memsize)
     }
 }
 
+BuddyManager::~BuddyManager()
+{
+    //deleting all heap allocated BNodes in freelist and allocated_blocks
+    for(int i {}; i <= std::log2(memsize); ++i)
+    {
+        BNode* current = freelist[i];
+        while (current)
+        {
+            BNode* target = current;
+            current = current->next;
+            delete target;
+        }
+    }
+
+    for (auto ele: allocated_blocks)
+    {
+        BNode* target = ele.second;
+        if(target)
+        {
+            delete target;
+        }
+    }
+}
+
 BNode* BuddyManager::trickle(int index)
 {
     if(freelist[index])
