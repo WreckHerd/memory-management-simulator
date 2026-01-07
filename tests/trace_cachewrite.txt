@@ -10,10 +10,8 @@ malloc 128
 malloc 128
 malloc 128
 write 0 
-write 0
 write 4
 write 1000
-read 128
 write 128
 write 256
 memdump

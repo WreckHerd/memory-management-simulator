@@ -1,0 +1,21 @@
+n
+1024
+firstfit
+64
+256
+16
+1
+lru
+malloc 200
+malloc 200
+malloc 100
+malloc 200
+malloc 500
+memdump
+free 3
+free 1
+memdump
+malloc 50
+memdump
+stats
+exit

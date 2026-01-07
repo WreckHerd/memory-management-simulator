@@ -11,8 +11,6 @@ malloc 200
 malloc 100
 malloc 200
 malloc 500
-malloc 50
-malloc 50
 memdump
 free 3
 free 1

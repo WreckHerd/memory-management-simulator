@@ -80,7 +80,14 @@ public:
             ++misses;
             totalcycles += LatencyL2;
             if(!l2.access(address))
+            {
                 totalcycles += Latencymem;
+                std::cout << "l1 and l2 miss for write\n";
+            }
+            else
+            {
+                std::cout << "l2 hit for write\n";
+            }
         }
         else
         {
@@ -312,7 +319,14 @@ int main()
 
         else if(command == "memdump")
         {
-            proc.mem.dump();
+            if(proc.isBuddy)
+            {
+                ;
+            }
+            else
+            {
+                proc.mem.dump();
+            }
         }
 
         else if(command == "help")
