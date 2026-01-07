@@ -232,7 +232,7 @@ void MemoryManager::dump()
     memNode* current = head;
     while (current != nullptr)
     {
-        std::cout << "start addr: " << current->startAddress <<  ", size: " << current->size << ", isFree: " << current->isFree;
+        std::cout << "start addr: " << current->startAddress <<  ", size: " << current->size << ", isFree: " << std::boolalpha << current->isFree << std::noboolalpha;
         if(!current->isFree)
             std::cout << ", block id: " << current->id << std::endl;
         else

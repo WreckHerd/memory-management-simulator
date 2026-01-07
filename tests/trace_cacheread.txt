@@ -1,0 +1,24 @@
+n
+4096
+bestfit
+128
+512
+16
+2
+lru
+malloc 128
+malloc 128
+malloc 128
+read 0
+read 0 
+read 4
+read 1000
+read 128
+read 256
+read 0
+read 256
+read 128
+read 0
+memdump
+stats
+exit

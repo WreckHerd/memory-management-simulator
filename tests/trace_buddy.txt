@@ -1,0 +1,13 @@
+y
+1024
+64
+256
+16
+1
+lru
+malloc 100
+malloc 500
+malloc 100
+free 1
+free 3
+exit
