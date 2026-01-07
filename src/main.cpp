@@ -50,7 +50,7 @@ public:
         {
             std::cout << "l2 cache hit\n" << std::endl;
             ++hits;
-            std::cout << "address loaded to l1\n" << std::endl;
+            std::cout << "block loaded to l1\n" << std::endl;
             l1.load(address);
             return;
         }
@@ -59,7 +59,7 @@ public:
 
         ++misses;
         std::cout << "l1 and l2 miss" << std::endl;
-        std::cout << "address loaded to l1 and l2\n" << std::endl; 
+        std::cout << "block loaded to l1 and l2\n" << std::endl; 
         l1.load(address);
         l2.load(address);
     }
@@ -85,12 +85,12 @@ public:
             {
                 totalcycles += Latencymem;
                 std::cout << "l1 and l2 miss for write\n";
-                std::cout << "address loaded to l1\n";
+                std::cout << "block loaded to l1\n";
             }
             else
             {
                 std::cout << "l2 hit for write\n";
-                std::cout << "address loaded to l1\n";
+                std::cout << "block loaded to l1\n";
             }
         }
         else
