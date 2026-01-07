@@ -48,8 +48,9 @@ public:
         totalcycles += LatencyL2;
         if (l2.access(address))
         {
-            std::cout << "l2 cache hit" << std::endl;
+            std::cout << "l2 cache hit\n" << std::endl;
             ++hits;
+            std::cout << "address loaded to l1\n" << std::endl;
             l1.load(address);
             return;
         }
@@ -58,6 +59,7 @@ public:
 
         ++misses;
         std::cout << "l1 and l2 miss" << std::endl;
+        std::cout << "address loaded to l1 and l2\n" << std::endl; 
         l1.load(address);
         l2.load(address);
     }
@@ -68,7 +70,7 @@ public:
 
         if(!mem.isValidAddress(address))
         {
-            std::cout << "segmentation fault" << std::endl;
+            std::cout << "segmentation fault\n" << std::endl;
             return;
         }        
 
@@ -83,10 +85,12 @@ public:
             {
                 totalcycles += Latencymem;
                 std::cout << "l1 and l2 miss for write\n";
+                std::cout << "address loaded to l1\n";
             }
             else
             {
                 std::cout << "l2 hit for write\n";
+                std::cout << "address loaded to l1\n";
             }
         }
         else
