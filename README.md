@@ -30,27 +30,29 @@
     
     
     ### Initialize MemoryAllocator and Cache with desired conifgurations:
-    Do you want buddy allocation (N/y): n
-    Enter MainMemory size (bytes): 1024
-    Enter Allocation Strategy (firstfit / bestfit / worstfit): bestfit
-    Enter L1 Cache Size (bytes): 128
-    Enter L2 Cache Size (bytes): 512
-    Enter linesize (bytes): 16
-    Enter Cache associativity ((1)direct associative / (2)-way associative / (4)-way associative / (8)-way associative): 1
-    Enter Cache Replacement Policy (fifo / lru): lru
+    - Do you want buddy allocation (N/y): n
+    - Enter MainMemory size (bytes): 1024
+    - Enter Allocation Strategy (firstfit / bestfit / worstfit): bestfit
+    - Enter L1 Cache Size (bytes): 128
+    - Enter L2 Cache Size (bytes): 512
+    - Enter linesize (bytes): 16
+    - Enter Cache associativity ((1)direct associative / (2)-way associative / (4)-way associative / (8)-way associative): 1
+    - Enter Cache Replacement Policy (fifo / lru): lru
 
    ### Available commands
-   malloc <size>     : allaocate a block of <size> in memory
-   free <blockId>    : free the block with id <blockId
-   memdump           : print the current state of memeory
-   read <address>    : read data a <address> from cache or memory
-   write <address>   : write into <address>
-   stats             : print stats related to cache and memory
-   quit / exit       : exit the simulator
+   - malloc <size>     : allaocate a block of <size> in memory
+   - free <blockId>    : free the block with id <blockId
+   - memdump           : print the current state of memeory
+   - read <address>    : read data a <address> from cache or memory
+   - write <address>   : write into <address>
+   - stats             : print stats related to cache and memory
+   - quit / exit       : exit the simulator
 
-Alternatively
+4. Alternatively
+
     if you want a quick run or want to test some feature you can use one of the trace files in tests/ as input
-    ```
+   
+    ```bash
     ./memsim < tests/trace_allocator_bestfit.txt
     ```
 
