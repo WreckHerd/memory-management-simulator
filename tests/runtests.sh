@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Compiling simulator..."
-g++ -std=c++17 -I include src/main.cpp src/allocator/allocator.cpp src/cache/cache.cpp src/buddy/buddy.cpp -o simulator
+g++ -std=c++17 -I include src/main.cpp src/allocator/allocator.cpp src/cache/cache.cpp src/buddy/buddy.cpp -o memsim
 
 if [ $? -ne 0 ]; then
     echo "Compilation failed!"
@@ -20,7 +20,7 @@ do
         
         # Run simulator and save output to a results file
         outfile="${test_file%.txt}.result"
-        ./simulator < "$test_file" > "$outfile"
+        ./memsim < "$test_file" > "$outfile"
         
         echo "  -> Finished. Output saved to $outfile"
         
