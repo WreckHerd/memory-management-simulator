@@ -40,17 +40,17 @@
     - Enter Cache Replacement Policy (fifo / lru): lru
 
    ### Available commands
-   - malloc <size>     : allaocate a block of <size> in memory
-   - free <blockId>    : free the block with id <blockId
+   - malloc <size>     : allaocate a block of \<size\> in memory
+   - free <blockId>    : free the block with id \<blockId\>
    - memdump           : print the current state of memeory
-   - read <address>    : read data a <address> from cache or memory
-   - write <address>   : write into <address>
+   - read <address>    : read data a \<address\> from cache or memory
+   - write <address>   : write into \<address\>
    - stats             : print stats related to cache and memory
    - quit / exit       : exit the simulator
 
 4. Alternatively
 
-    if you want a quick run or want to test some feature you can use one of the trace files in tests/ as input
+    if you want a quick run or want to test some feature you can use one of the trace files in [tests/](tests/) as input
    
     ```bash
     ./memsim < tests/trace_allocator_bestfit.txt
