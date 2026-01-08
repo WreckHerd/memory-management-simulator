@@ -2,7 +2,7 @@
 
 1.  Clone the repository:
     ```bash
-    git clone [https://github.com/WreckHerd/memory-management-simulator.git](https://github.com/WreckHerd/memory-management-simulator.git)
+    git clone https://github.com/WreckHerd/memory-management-simulator.git
     cd memory-management-simulator
     ```
 
@@ -56,6 +56,7 @@
     ./memsim < tests/trace_allocator_bestfit.txt
     ```
 
+### for implementaion details check [docs/DesignDocument.md](docs/DesignDocument.md) 
 
 ## Demo Video
 
