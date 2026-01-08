@@ -47,10 +47,10 @@
     - Enter Cache Replacement Policy (fifo / lru): lru
 
    ### Available commands
-   - malloc <size>     : allaocate a block of \<size\> in memory
+   - malloc <size>     : allocate a block of \<size\> in memory
    - free <blockId>    : free the block with id \<blockId\>
    - memdump           : print the current state of memeory
-   - read <address>    : read data a \<address\> from cache or memory
+   - read <address>    : read data at \<address\> from cache or memory
    - write <address>   : write into \<address\>
    - stats             : print stats related to cache and memory
    - quit / exit       : exit the simulator
