@@ -136,11 +136,11 @@ public:
 void printhelp()
 {
     std::cout << "\n---List of commands---\n";
-    std::cout << "malloc <size>     : allaocate a block of <size> in memory\n";
-    std::cout << "free <blockId>    : free the block with id <blockId\n"; 
+    std::cout << "malloc <size>     : allocate a block of <size> in memory\n";
+    std::cout << "free <blockId>    : free the block with id <blockId>\n"; 
     std::cout << "memdump           : print the current state of memeory\n";
     std::cout << std::endl;
-    std::cout << "read <address>    : read data a <address> from cache or memory\n";
+    std::cout << "read <address>    : read data at <address> from cache or memory\n";
     std::cout << "write <address>   : write into <address>\n";
     std::cout << "stats             : print stats related to cache and memory\n";
     std::cout << "quit / exit       : exit the simulator\n";
