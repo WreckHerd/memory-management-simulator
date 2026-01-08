@@ -5,14 +5,21 @@
     git clone https://github.com/WreckHerd/memory-management-simulator.git
     cd memory-management-simulator
     ```
+2. Quick Run
+   ```bash
+   ./tests/runtests.sh
+   ```
+   the above code runs all the tests and saves the output in .result files under [tests/](tests/)
 
-2.  Compile the source code:
+
+## Usage
+
+3. Compile the source code:
     ```bash
     g++ -I include src/main.cpp src/allocator/allocator.cpp src/cache/cache.cpp src/buddy/buddy.cpp -o memsim
     ```
 
-## Usage
-3. Execute
+4. Manual Configuration
 
     ```bash
     ./memsim
@@ -48,7 +55,7 @@
    - stats             : print stats related to cache and memory
    - quit / exit       : exit the simulator
 
-4. Alternatively
+5. Alternatively
 
     if you want a quick run or want to test some feature you can use one of the trace files in [tests/](tests/) as input
    
