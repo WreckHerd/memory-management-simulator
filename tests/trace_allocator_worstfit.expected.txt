@@ -1,0 +1,73 @@
+
+___Configuration must follow the following requirements___
+- 0 < L1 size < L2 size < main memory size
+- Buddy allocation requires memory size to be a power of two
+- Line size must be a power of 2
+- Cache size and main memory size must be multiple of line size
+- Number of lines = L(1,2) size/linesize, must be divisible by associativity
+- Associativity > 0
+Note: if you want a quick run you can find test inputs in tests directory
+
+Initialize MemoryAllocator and Cache
+Do you want buddy allocation (N/y): Enter MainMemory size (bytes): Enter Allocation Strategy (firstfit / bestfit / worstfit): Enter L1 Cache Size (bytes): Enter L2 Cache Size (bytes): Enter linesize (bytes): Enter Cache associativity ((1)direct associative / (2)-way associative / (4)-way associative / (8)-way associative): Enter Cache Replacement Policy (fifo / lru): 
+--simulator initialized successfully--
+
+---List of commands---
+malloc <size>     : allaocate a block of <size> in memory
+free <blockId>    : free the block with id <blockId
+memdump           : print the current state of memeory
+
+read <address>    : read data a <address> from cache or memory
+write <address>   : write into <address>
+stats             : print stats related to cache and memory
+quit / exit       : exit the simulator
+-------------------------
+
+ MEMSIM> Allocated block id = 1 at address = 0
+
+ MEMSIM> Allocated block id = 2 at address = 200
+
+ MEMSIM> Allocated block id = 3 at address = 400
+
+ MEMSIM> Allocated block id = 4 at address = 500
+
+ MEMSIM> allocation failed
+
+ MEMSIM> start addr: 0, size: 200, isFree: false, block id: 1
+start addr: 200, size: 200, isFree: false, block id: 2
+start addr: 400, size: 100, isFree: false, block id: 3
+start addr: 500, size: 200, isFree: false, block id: 4
+start addr: 700, size: 324, isFree: true
+
+ MEMSIM> Block with id 3 freed
+
+ MEMSIM> Block with id 1 freed
+
+ MEMSIM> start addr: 0, size: 200, isFree: true
+start addr: 200, size: 200, isFree: false, block id: 2
+start addr: 400, size: 100, isFree: true
+start addr: 500, size: 200, isFree: false, block id: 4
+start addr: 700, size: 324, isFree: true
+
+ MEMSIM> Allocated block id = 5 at address = 700
+
+ MEMSIM> start addr: 0, size: 200, isFree: true
+start addr: 200, size: 200, isFree: false, block id: 2
+start addr: 400, size: 100, isFree: true
+start addr: 500, size: 200, isFree: false, block id: 4
+start addr: 700, size: 50, isFree: false, block id: 5
+start addr: 750, size: 274, isFree: true
+
+ MEMSIM> ---Allocator stats---
+Total memory: 1024
+Used memory: 450
+Memory Utilization: 43.9453%
+External Fregmentation: 52.2648%
+Allocation faliure rate: 16.6667%
+
+---Cache stats---
+Cache level L1 has 0 misses and 0 hits
+Cache level L2 has 0 misses and 0 hits
+Hit ratio: -nan
+no reads or writes performed yet
+ MEMSIM> Simulation Terminated

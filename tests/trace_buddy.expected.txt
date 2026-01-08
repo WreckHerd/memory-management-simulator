@@ -1,0 +1,36 @@
+
+___Configuration must follow the following requirements___
+- 0 < L1 size < L2 size < main memory size
+- Buddy allocation requires memory size to be a power of two
+- Line size must be a power of 2
+- Cache size and main memory size must be multiple of line size
+- Number of lines = L(1,2) size/linesize, must be divisible by associativity
+- Associativity > 0
+Note: if you want a quick run you can find test inputs in tests directory
+
+Initialize MemoryAllocator and Cache
+Do you want buddy allocation (N/y): Enter MainMemory size (bytes): Enter L1 Cache Size (bytes): Enter L2 Cache Size (bytes): Enter linesize (bytes): Enter Cache associativity ((1)direct associative / (2)-way associative / (4)-way associative / (8)-way associative): Enter Cache Replacement Policy (fifo / lru): 
+--simulator initialized successfully--
+
+---List of commands---
+malloc <size>     : allaocate a block of <size> in memory
+free <blockId>    : free the block with id <blockId
+memdump           : print the current state of memeory
+
+read <address>    : read data a <address> from cache or memory
+write <address>   : write into <address>
+stats             : print stats related to cache and memory
+quit / exit       : exit the simulator
+-------------------------
+
+ MEMSIM> allocated a block at address: 0, of size: 128, with blockId: 1
+
+ MEMSIM> allocated a block at address: 512, of size: 512, with blockId: 2
+
+ MEMSIM> allocated a block at address: 128, of size: 128, with blockId: 3
+
+ MEMSIM> Freed block with id: 1, of size:128
+
+ MEMSIM> Freed block with id: 3, of size:512
+
+ MEMSIM> Simulation Terminated

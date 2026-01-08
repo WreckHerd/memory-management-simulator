@@ -1,6 +1,6 @@
 n
 1024
-worstfit 
+bestfit 
 64
 256
 16
