@@ -11,7 +11,7 @@ fi
 echo "Compilation successful. Running tests..."
 echo "----------------------------------------"
 
-TESTS=("tests/trace_allocator_bestfit.txt" "tests/trace_allocator_worstfit.txt" "tests/trace_allocator_firstfit.txt" "tests/trace_buddy.txt" "tests/trace_cacheread_lru.txt")
+TESTS=("tests/trace_allocator_bestfit.txt" "tests/trace_allocator_worstfit.txt" "tests/trace_allocator_firstfit.txt" "tests/trace_buddy.txt" "tests/trace_cacheread_lru.txt" "tests/trace_cacheread_fifo.txt" "tests/trace_cachewrite.txt")
 
 for test_file in "${TESTS[@]}"
 do
